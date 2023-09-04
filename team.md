@@ -134,3 +134,21 @@ C까지 접근한 경로인 `breadcrumbs`는 `A/B/C`를 반환하게 된다.
 이렇게 두 단계를 계속 반복해나가면 된다.  
 이는 현재 테이블 구성에서는 상당히 비효율적인 방법이 될 것이다. 여러 테이블을 오가며 검색을 해야하니 말이다.  
 따라서, 수정하는 상황에서 다소 불편함의 여지가 있더라도 정규화가 최대한 진행된 상황에서 필요한 데이터들을 구성해놓은 테이블을 생성하여 접근하는 것이 훨씬 빠르다고 판단된다.
+
+## 전체 코드
+
+```js
+const pg = require("pg");
+const conn = new pg.Client({ database: "test" });
+
+(async () => {
+  await conn.connect();
+  const res = await conn.query(
+    "select p.id, p.title, sp.title as subPage, pp.breadcrumbs from posts as p " +
+      "left join sub_pages as sp on p.id = sp.post_id " +
+      "left join breadcrumbs as pp on p.id = pp.post_id where p.id = 2;"
+  );
+  console.log(res.rows[0]);
+  conn.end();
+})();
+```
